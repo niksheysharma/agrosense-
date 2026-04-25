@@ -62,13 +62,20 @@
                 <p data-i18n="farmStatus">Your farm is looking healthy overall.</p>
             </div>
 
-            <!-- Alerts / Early Warning -->
+            <!-- Early Warning -->
             <div class="early-warning-card warning">
                 <div class="card-icon"><i data-feather="alert-triangle"></i></div>
                 <div class="card-content">
                     <h3 data-i18n="alertTitle">Pest Alert</h3>
                     <p data-i18n="alertDesc">High risk of Aphids matching regional trends. Consider preventive spray.</p>
                 </div>
+            </div>
+
+            <!-- Prominent Quick Action Button -->
+            <div class="dashboard-section">
+                <button class="btn btn-primary btn-block flex-center" onclick="app.switchTab('scan')" style="padding: 16px; font-size: 1.1rem; gap: 8px; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);">
+                    <i data-feather="camera"></i> <span data-i18n="quickScanText">Upload Image to Detect Disease</span>
+                </button>
             </div>
 
             <!-- Soil Health Snapshot -->
