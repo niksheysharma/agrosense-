@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AgroSense - Crop Intelligence Platform</title>
+    <meta name="description" content="AI-powered plant disease detection and soil health analysis for farmers.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- App Container -->
+    <div class="app-container">
+        <!-- Top Navigation -->
+        <header class="app-header">
+            <div class="header-logo">
+                <i data-feather="sun" class="logo-icon"></i>
+                <h1>AgroSense</h1>
+            </div>
+            <div class="header-actions">
+                <button id="langToggle" class="icon-btn" aria-label="Toggle Language" title="Translate">
+                    <i data-feather="globe"></i>
+                    <span id="currentLang">EN</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="app-main" id="mainContent">
+            <!-- Dynamic Content Injected Here -->
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-tab="dashboard">
+                <i data-feather="home"></i>
+                <span data-i18n="navDashboard">Home</span>
+            </button>
+            <button class="nav-item scan-btn-wrapper" data-tab="scan">
+                <div class="scan-btn">
+                    <i data-feather="camera"></i>
+                </div>
+            </button>
+            <button class="nav-item" data-tab="soil">
+                <i data-feather="layers"></i>
+                <span data-i18n="navSoil">Soil</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Templates -->
+    <template id="tmpl-dashboard">
+        <section class="screen-dashboard fade-in">
+            <!-- Welcome Header -->
+            <div class="welcome-section">
+                <h2 data-i18n="welcome">Welcome back, Farmer!</h2>
+                <p data-i18n="farmStatus">Your farm is looking healthy overall.</p>
+            </div>
+
+            <!-- Alerts / Early Warning -->
+            <div class="early-warning-card warning">
+                <div class="card-icon"><i data-feather="alert-triangle"></i></div>
+                <div class="card-content">
+                    <h3 data-i18n="alertTitle">Pest Alert</h3>
+                    <p data-i18n="alertDesc">High risk of Aphids matching regional trends. Consider preventive spray.</p>
+                </div>
+            </div>
+
+            <!-- Soil Health Snapshot -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h3 data-i18n="soilHealth">Real-time Soil Health</h3>
+                    <button class="text-btn text-accent" data-i18n="seeAll" onclick="app.switchTab('soil')">Details</button>
+                </div>
+                <div class="soil-stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon N"><i data-feather="droplet"></i></div>
+                        <div class="stat-value">45<small>mg/kg</small></div>
+                        <div class="stat-label">Nitrogen</div>
+                        <div class="stat-status good">Optimal</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon moisture"><i data-feather="cloud-rain"></i></div>
+                        <div class="stat-value">32<small>%</small></div>
+                        <div class="stat-label">Moisture</div>
+                        <div class="stat-status warning">Low</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Scans -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h3 data-i18n="recentScans">Recent Scans</h3>
+                </div>
+                <div class="scans-list">
+                    <!-- Injected dynamically -->
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="tmpl-scan">
+        <section class="screen-scan fade-in">
+            <h2 class="section-title" data-i18n="newScan">New Diagnosis</h2>
+            <p class="section-subtitle" data-i18n="scanInstruction">Capture or upload a clear picture of the affected leaf.</p>
+            
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" accept="image/*" hidden>
+                <div class="upload-content">
+                    <div class="upload-icon"><i data-feather="upload-cloud"></i></div>
+                    <h3 data-i18n="tapToUpload">Tap to capture or upload</h3>
+                    <p data-i18n="offlineReady">Works offline</p>
+                </div>
+            </div>
+
+            <div id="scanPreview" class="scan-preview hidden">
+                <img id="previewImage" src="" alt="Leaf Preview">
+                <button class="btn btn-primary btn-block animate-pulse" id="analyzeBtn" data-i18n="analyzeBtn">
+                    Analyze Disease & Soil
+                </button>
+                <button class="btn btn-secondary btn-block mt-4" id="retakeBtn" data-i18n="retakeBtn">
+                    Retake
+                </button>
+            </div>
+
+            <div id="analysisLoader" class="analysis-loader hidden">
+                <div class="spinner"></div>
+                <h3 data-i18n="analyzing">Running On-Device AI...</h3>
+                <p id="loaderText">Fetching local soil data...</p>
+            </div>
+        </section>
+    </template>
+
+    <template id="tmpl-result">
+        <section class="screen-result slide-up">
+            <div class="result-header">
+                <button class="icon-btn text-white" onclick="app.switchTab('scan')"><i data-feather="chevron-left"></i></button>
+                <h2 data-i18n="diagnosisResult">Diagnosis Result</h2>
+                <div style="width: 24px;"></div>
+            </div>
+            
+            <div class="result-image-container">
+                <img id="resImage" src="" alt="Analyzed Leaf">
+                <div class="confidence-badge">
+                    <i data-feather="check-circle"></i> <span id="resConfidence">92%</span>
+                </div>
+            </div>
+
+            <div class="result-content">
+                <div class="diagnosis-card">
+                    <h3 id="resDisease" class="disease-name">Leaf Blight</h3>
+                    <p id="resSymptoms" class="symptoms-text">Brown necrotic spots with yellow halos.</p>
+                </div>
+
+                <div class="correlation-card">
+                    <div class="corr-header">
+                        <i data-feather="link"></i>
+                        <h4 data-i18n="rootCauseAnalysis">Root Cause Analysis</h4>
+                    </div>
+                    <p id="resRootCause">Combining leaf symptoms with your low soil moisture (32%) and high temperature (30°C), this is likely heat-induced stress exacerbating the blight.</p>
+                </div>
+
+                <div class="action-plan">
+                    <h3 data-i18n="actionPlan">Recommended Action Plan</h3>
+                    <ul class="action-list" id="resActions">
+                        <!-- Actions injected here -->
+                    </ul>
+                </div>
+                
+                <button class="btn btn-primary btn-block mt-8 mb-4 flex-center" onclick="app.speakResult()">
+                    <i data-feather="volume-2" class="mr-2"></i> <span data-i18n="readAloud">Read Aloud</span>
+                </button>
+                <button class="btn btn-secondary btn-block mb-8" onclick="app.switchTab('dashboard')" data-i18n="backHome">Back to Home</button>
+            </div>
+        </section>
+    </template>
+
+    <template id="tmpl-soil">
+        <section class="screen-soil fade-in">
+            <div class="section-header mb-6">
+                <h2 class="section-title" data-i18n="soilHealthCard">Soil Health Card</h2>
+                <span class="badge badge-success" data-i18n="live">Live Data</span>
+            </div>
+
+            <div class="soil-grid">
+                <!-- NPK Values -->
+                <div class="soil-card highlight">
+                    <div class="soil-icon N"><i data-feather="droplet"></i></div>
+                    <div class="soil-info">
+                        <div class="soil-label">Nitrogen (N)</div>
+                        <div class="soil-val">45 <span class="unit">mg/kg</span></div>
+                    </div>
+                    <div class="soil-trend up"><i data-feather="trending-up"></i></div>
+                </div>
+                <div class="soil-card highlight">
+                    <div class="soil-icon P"><i data-feather="hexagon"></i></div>
+                    <div class="soil-info">
+                        <div class="soil-label">Phosphorus (P)</div>
+                        <div class="soil-val">12 <span class="unit">mg/kg</span></div>
+                    </div>
+                    <div class="soil-trend down"><i data-feather="trending-down"></i></div>
+                </div>
+                <div class="soil-card highlight">
+                    <div class="soil-icon K"><i data-feather="target"></i></div>
+                    <div class="soil-info">
+                        <div class="soil-label">Potassium (K)</div>
+                        <div class="soil-val">180 <span class="unit">mg/kg</span></div>
+                    </div>
+                    <div class="soil-trend stable"><i data-feather="minus"></i></div>
+                </div>
+
+                <!-- Environment -->
+                <div class="soil-card">
+                    <div class="soil-icon ph"><i data-feather="activity"></i></div>
+                    <div class="soil-info">
+                        <div class="soil-label">pH Level</div>
+                        <div class="soil-val">6.5 <span class="unit"></span></div>
+                    </div>
+                    <p class="soil-status text-success">Optimal</p>
+                </div>
+                <div class="soil-card">
+                    <div class="soil-icon moisture"><i data-feather="cloud-rain"></i></div>
+                    <div class="soil-info">
+                        <div class="soil-label">Moisture</div>
+                        <div class="soil-val">32 <span class="unit">%</span></div>
+                    </div>
+                    <p class="soil-status text-warning">Low</p>
+                </div>
+                <div class="soil-card">
+                    <div class="soil-icon temp"><i data-feather="thermometer"></i></div>
+                    <div class="soil-info">
+                        <div class="soil-label">Temperature</div>
+                        <div class="soil-val">28 <span class="unit">°C</span></div>
+                    </div>
+                    <p class="soil-status text-success">Good</p>
+                </div>
+            </div>
+            
+            <div class="soil-advice mt-8">
+                <h3 data-i18n="soilRecommendations">Soil Recommendations</h3>
+                <div class="advice-card mt-4">
+                    <i data-feather="info" class="text-accent"></i>
+                    <p data-i18n="soilAdviceText">Phosphorus levels are dropping. Consider applying a balanced NPK fertilizer (like 10-26-26) in the next week. Moisture is critical, schedule irrigation soon.</p>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
